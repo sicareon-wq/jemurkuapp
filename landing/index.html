@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="jemurku.app — Tahu hujan sebelum cucian basah. Asisten jemur untuk usaha laundry, gratis selama beta.">
+  <meta property="og:title" content="jemurku.app — Tahu hujan sebelum cucian basah">
+  <meta property="og:description" content="Estimasi pengeringan + peringatan hujan untuk usaha laundry. Tanpa alat, tanpa daftar.">
+  <meta property="og:type" content="website">
+  <title>jemurku.app — Tahu hujan sebelum cucian basah</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <!-- 1. Nav ramping -->
+  <header class="nav">
+    <a class="logo" href="#">jemurku.app</a>
+    <nav class="nav-links">
+      <a href="#demo">Coba Demo</a>
+      <a class="btn btn-primary" href="https://wa.me/62XXXXXXXXXX?text=Halo%20jemurku.app%2C%20saya%20mau%20DAFTAR%20beta%20gratis.%20Nama%20usaha%3A%20">Daftar via WhatsApp</a>
+    </nav>
+  </header>
+
+  <main>
+    <!-- 2. Hero split-screen -->
+    <section class="hero">
+      <div class="hero-copy">
+        <h1>Tahu hujan sebelum cucian basah</h1>
+        <p class="sub">Asisten jemur untuk usaha laundry: estimasi kering dan peringatan hujan, langsung di HP.</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="https://wa.me/62XXXXXXXXXX?text=Halo%20jemurku.app%2C%20saya%20mau%20DAFTAR%20beta%20gratis.%20Nama%20usaha%3A%20">Daftar via WhatsApp</a>
+          <a class="btn" href="#demo">Coba Demo</a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <!-- TODO: ganti dengan foto usaha nyata (jemuran/HP di lapangan) -->
+        <div class="photo-slot" role="img" aria-label="Slot foto usaha — segera diisi foto jemuran nyata">Foto usaha segera hadir</div>
+      </div>
+    </section>
+
+    <!-- 3. Demo live -->
+    <section id="demo" class="demo">
+      <h2>Lihat cara kerjanya, data nyata</h2>
+      <p>Contoh lokasi Sleman, diambil langsung dari prakiraan cuaca saat halaman dibuka.</p>
+      <div class="demo-card" id="demoCard" data-status="unknown" aria-live="polite">
+        <p class="demo-place">Sleman, Yogyakarta (contoh)</p>
+        <div class="demo-main">
+          <span id="demoIcon" aria-hidden="true">⏳</span>
+          <div>
+            <strong id="demoStatus">Memuat cuaca…</strong>
+            <p id="demoDetail">Menghubungi prakiraan cuaca.</p>
+          </div>
+        </div>
+        <p class="demo-risk">Peluang hujan 3 jam ke depan: <strong id="demoRisk">…</strong></p>
+      </div>
+      <a class="btn btn-primary" href="../index.html">Buka versi lengkap</a>
+    </section>
+
+    <!-- 4. Cara kerja (strip 3 langkah) -->
+    <section class="steps">
+      <h2>Pakai dalam tiga langkah</h2>
+      <ol>
+        <li><strong>Buka</strong><span>Tanpa daftar, tanpa pasang aplikasi.</span></li>
+        <li><strong>Izinkan lokasi</strong><span>Atau ketik nama desa dan dusun.</span></li>
+        <li><strong>Ikuti kartu besar</strong><span>Hijau jemur luar, merah pindah indoor.</span></li>
+      </ol>
+    </section>
+
+    <!-- 5. Fitur 2+2 asimetris -->
+    <section class="features">
+      <h2>Kenapa jemurku</h2>
+      <div class="feature-grid">
+        <article class="feature-big">
+          <h3>Keputusan, bukan angka</h3>
+          <p>Status CEPAT, NORMAL, LAMBAT, atau TUNDA — plus alasan dan apa yang harus dilakukan. "Kelembapan 85%" diterjemahkan jadi "pertimbangkan indoor".</p>
+        </article>
+        <article>
+          <h3>Peringatan hujan</h3>
+          <p>Banner dan bunyi saat peluang hujan melewati ambang yang kamu atur.</p>
+        </article>
+        <article>
+          <h3>Daerah terpencil</h3>
+          <p>GPS, nama desa dan dusun, sampai koordinat manual.</p>
+        </article>
+        <article>
+          <h3>Gratis beta</h3>
+          <p>Tanpa alat sensor, tanpa daftar, tanpa kartu.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- 6. Harga teaser -->
+    <section class="pricing">
+      <h2>Harga</h2>
+      <p><strong>Gratis selama beta.</strong> <span class="badge">Paket Pro (notif WA otomatis) segera hadir.</span></p>
+    </section>
+
+    <!-- 7. FAQ akordeon -->
+    <section class="faq">
+      <h2>Sering ditanyakan</h2>
+      <details>
+        <summary>Perlu alat tambahan?</summary>
+        <p>Tidak. Cukup HP yang bisa buka browser.</p>
+      </details>
+      <details>
+        <summary>Desa saya terpencil, akurat?</summary>
+        <p>Prakiraan dihitung per koordinat, bukan per kota. Cari nama desa dan dusun, atau masukkan koordinat manual.</p>
+      </details>
+      <details>
+        <summary>HP kentang bisa?</summary>
+        <p>Bisa. Halaman ringan, tanpa login, tanpa aplikasi.</p>
+      </details>
+      <details>
+        <summary>Bayar?</summary>
+        <p>Gratis selama beta. Fitur berbayar (seperti notif WA otomatis) menyusul sebagai Paket Pro.</p>
+      </details>
+      <details>
+        <summary>Dari mana datanya?</summary>
+        <p>Prakiraan cuaca Open-Meteo, sumber terbuka tanpa API key.</p>
+      </details>
+    </section>
+
+    <!-- 8. CTA final -->
+    <section class="final-cta">
+      <h2>Siap jemur tanpa was-was?</h2>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="https://wa.me/62XXXXXXXXXX?text=Halo%20jemurku.app%2C%20saya%20mau%20DAFTAR%20beta%20gratis.%20Nama%20usaha%3A%20">Daftar via WhatsApp</a>
+        <a class="btn" href="https://wa.me/62XXXXXXXXXX?text=Halo%20jemurku.app%2C%20saya%20mau%20KONSULTASI%20dulu.%20Pertanyaan%20saya%3A%20">Konsultasi Gratis</a>
+      </div>
+    </section>
+  </main>
+
+  <!-- 9. Footer ringkas -->
+  <footer class="footer">
+    <p><strong>jemurku.app</strong> v0.1 — Data cuaca: <a href="https://open-meteo.com/" rel="noopener">Open-Meteo</a></p>
+  </footer>
+
+  <script src="assets/js/demo.js"></script>
+</body>
+</html>
