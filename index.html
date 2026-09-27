@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Web laundry dengan prakiraan cuaca Open-Meteo: estimasi pengeringan dan peringatan hujan.">
+  <title>JemurKu — Laundry + Cuaca</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-icon" aria-hidden="true">🧺</span>
+      <div>
+        <h1>JemurKu</h1>
+        <p>Asisten jemur laundry berbasis cuaca</p>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <span id="updateTime" class="update-time">Belum dimuat</span>
+      <button id="btnRefresh" class="btn btn-primary" type="button">Muat ulang</button>
+    </div>
+  </header>
+
+  <div id="rainBanner" class="rain-banner" hidden role="alert">
+    <span aria-hidden="true">🌧️</span>
+    <strong>Peringatan hujan!</strong>
+    <span id="rainBannerText">Peluang hujan tinggi dalam 3 jam ke depan.</span>
+  </div>
+
+  <div id="appMessage" class="app-message" hidden></div>
+
+  <main class="bento">
+    <!-- 1. Status pengeringan hero -->
+    <section class="card hero" id="statusCard" data-status="unknown" aria-live="polite">
+      <p class="card-label">Status pengeringan</p>
+      <div class="hero-main">
+        <span id="statusIcon" class="hero-icon" aria-hidden="true">⏳</span>
+        <div>
+          <h2 id="statusTitle">Menunggu lokasi…</h2>
+          <p id="statusDesc" class="hero-desc">Aktifkan GPS atau cari lokasi usaha Anda.</p>
+        </div>
+      </div>
+      <div class="hero-reasons">
+        <p class="card-label">Kenapa estimasi ini?</p>
+        <ul id="reasonList">
+          <li>Belum ada data cuaca.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 2. Cuaca saat ini -->
+    <section class="card" aria-label="Cuaca saat ini">
+      <p class="card-label">Cuaca saat ini</p>
+      <div class="current-temp">
+        <span id="curTemp">--</span><span class="unit">°C</span>
+      </div>
+      <p id="curCondition" class="current-condition">--</p>
+      <dl class="stats">
+        <div><dt>Terasa</dt><dd id="curFeels">--</dd></div>
+        <div><dt>Kelembapan</dt><dd id="curHumidity">--</dd></div>
+        <div><dt>Angin</dt><dd id="curWind">--</dd></div>
+        <div><dt>Awan</dt><dd id="curCloud">--</dd></div>
+      </dl>
+    </section>
+
+    <!-- 3. Risiko hujan -->
+    <section class="card" aria-label="Risiko hujan">
+      <p class="card-label">Risiko hujan 3 jam ke depan</p>
+      <div class="risk-number"><span id="riskMax">--</span><span class="unit">%</span></div>
+      <p id="riskText" class="muted">--</p>
+      <ul id="riskHours" class="risk-hours"></ul>
+    </section>
+
+    <!-- 4. Per-jam -->
+    <section class="card wide" aria-label="Prakiraan per jam">
+      <p class="card-label">Per jam (12 jam ke depan)</p>
+      <div id="hourlyStrip" class="hourly-strip">
+        <p class="muted">Belum ada data.</p>
+      </div>
+    </section>
+
+    <!-- 5. Harian -->
+    <section class="card" aria-label="Prakiraan 3 hari">
+      <p class="card-label">3 hari ke depan</p>
+      <ul id="dailyList" class="daily-list">
+        <li class="muted">Belum ada data.</li>
+      </ul>
+    </section>
+
+    <!-- 6. Lokasi -->
+    <section class="card" aria-label="Lokasi">
+      <p class="card-label">Lokasi usaha</p>
+      <p id="locationLabel" class="location-label">Belum ada lokasi.</p>
+      <button id="btnGps" class="btn btn-primary" type="button">📍 Gunakan GPS</button>
+      <label class="field-label" for="searchInput">Cari negara / kota / kecamatan / desa / dusun</label>
+      <div class="search-row">
+        <input id="searchInput" type="search" placeholder="cth: Sleman, Yogyakarta" autocomplete="off">
+        <button id="btnSearch" class="btn" type="button">Cari</button>
+      </div>
+      <ul id="searchResults" class="search-results"></ul>
+      <details class="manual-coord">
+        <summary>Input koordinat manual (untuk dusun terpencil)</summary>
+        <div class="coord-row">
+          <label>Lat <input id="latInput" type="number" step="0.0001" min="-90" max="90" placeholder="-7.68"></label>
+          <label>Lon <input id="lonInput" type="number" step="0.0001" min="-180" max="180" placeholder="110.37"></label>
+          <button id="btnCoord" class="btn" type="button">Pakai</button>
+        </div>
+      </details>
+    </section>
+
+    <!-- 7. Pengaturan -->
+    <section class="card" aria-label="Pengaturan notifikasi">
+      <p class="card-label">Pengaturan hujan</p>
+      <label class="field-label" for="thresholdRange">
+        Ambang peringatan: <strong><span id="thresholdValue">65</span>%</strong>
+      </label>
+      <input id="thresholdRange" type="range" min="60" max="70" step="1" value="65">
+      <div class="setting-row">
+        <button id="btnNotify" class="btn" type="button">Aktifkan notifikasi</button>
+        <label class="toggle"><input id="soundToggle" type="checkbox" checked> Bunyi peringatan</label>
+      </div>
+      <p id="notifyState" class="muted">Notifikasi browser: belum diminta.</p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Data cuaca: <a href="https://open-meteo.com/" rel="noopener">Open-Meteo</a> (tanpa API key) · Dibuat statis untuk GitHub Pages</p>
+  </footer>
+
+  <script src="assets/js/location.js"></script>
+  <script src="assets/js/weather.js"></script>
+  <script src="assets/js/drying.js"></script>
+  <script src="assets/js/notify.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
