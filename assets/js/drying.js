@@ -6,11 +6,21 @@
     cepat: { icon: "🟢", title: "CEPAT — jemur luar", desc: "Kondisi bagus. Estimasi kering ±2–3 jam." },
     normal: { icon: "🟡", title: "NORMAL — jemur luar", desc: "Kondisi sedang. Estimasi kering ±4–6 jam." },
     lambat: { icon: "🟠", title: "LAMBAT — pertimbangkan indoor", desc: "Lembap/mendung. Estimasi ±7–9 jam." },
-    tunda: { icon: "🔴", title: "TUNDA / JEMUR INDOOR", desc: "Hujan aktif atau peluang hujan tinggi. Jangan jemur luar." }
+    tunda: { icon: "🔴", title: "TUNDA / JEMUR INDOOR", desc: "Hujan aktif atau peluang hujan tinggi. Jangan jemur luar." },
+    unknown: { icon: "⏳", title: "DATA BELUM LENGKAP", desc: "Sebagian data cuaca kosong. Coba muat ulang." }
   };
+
+  function isMissing(v) { return v == null || (typeof v === "number" && isNaN(v)); }
 
   function hitungEstimasi(current, hours3, threshold) {
     var reasons = [];
+    // F-1: guard data-tak-lengkap — cegah "Kelembapan null%" (null <= 60 = true di JS).
+    var need = [current.temperature_2m, current.relative_humidity_2m,
+      current.wind_speed_10m, current.cloud_cover];
+    if (!current || need.some(isMissing)) {
+      return { key: "unknown", maxProb3: window.JemurCuaca.maxProb(hours3 || []),
+        reasons: ["Data cuaca dari API belum lengkap. Tekan Muat ulang."] };
+    }
     var maxProb = window.JemurCuaca.maxProb(hours3);
     var hujanAktif = (current.precipitation != null && current.precipitation > 0.5)
       || window.JemurCuaca.isRainCode(current.weather_code);

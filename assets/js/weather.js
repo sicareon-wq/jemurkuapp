@@ -43,6 +43,7 @@
   }
 
   // Ambil N jam ke depan dari array hourly (cocokkan waktu ISO >= waktu current).
+  // F-3: bila current.time lebih baru dari semua entri (jam basi), default ke entri terakhir.
   function nextHours(data, n) {
     var times = (data.hourly && data.hourly.time) || [];
     var curTime = data.current && data.current.time;
@@ -50,6 +51,7 @@
     if (curTime) {
       for (var i = 0; i < times.length; i++) {
         if (times[i] >= curTime) { start = i; break; }
+        start = i; // curTime lebih baru dari semua entri -> pakai entri terakhir
       }
     }
     var out = [];

@@ -63,13 +63,14 @@
     var c = data.current;
     var threshold = window.JemurNotif.getThreshold();
 
-    // Cuaca kini
-    $("curTemp").textContent = Math.round(c.temperature_2m);
+    // Cuaca kini — guard null/NaN agar tak tampil "NaN°" / "null%".
+    function txt(v, suffix) { return (v == null || (typeof v === "number" && isNaN(v))) ? "–" : v + (suffix || ""); }
+    $("curTemp").textContent = (c.temperature_2m == null || isNaN(c.temperature_2m)) ? "--" : Math.round(c.temperature_2m);
     $("curCondition").textContent = window.JemurCuaca.codeToId(c.weather_code);
-    $("curFeels").textContent = Math.round(c.apparent_temperature) + "°C";
-    $("curHumidity").textContent = c.relative_humidity_2m + "%";
-    $("curWind").textContent = Math.round(c.wind_speed_10m) + " km/jam";
-    $("curCloud").textContent = c.cloud_cover + "%";
+    $("curFeels").textContent = (c.apparent_temperature == null || isNaN(c.apparent_temperature)) ? "--" : Math.round(c.apparent_temperature) + "°C";
+    $("curHumidity").textContent = txt(c.relative_humidity_2m, "%");
+    $("curWind").textContent = (c.wind_speed_10m == null || isNaN(c.wind_speed_10m)) ? "--" : Math.round(c.wind_speed_10m) + " km/jam";
+    $("curCloud").textContent = txt(c.cloud_cover, "%");
 
     // Jam-jam ke depan
     var hours12 = window.JemurCuaca.nextHours(data, 12);
@@ -84,7 +85,8 @@
     rh.innerHTML = "";
     hours3.forEach(function (h) {
       var li = document.createElement("li");
-      li.textContent = fmtHour(h.time) + " " + h.prob + "%";
+      var p = (h.prob == null || isNaN(h.prob)) ? "–" : h.prob + "%";
+      li.textContent = fmtHour(h.time) + " " + p;
       rh.appendChild(li);
     });
 
@@ -96,10 +98,10 @@
       var jam = document.createElement("strong");
       jam.textContent = fmtHour(h.time);
       var suhu = document.createElement("div");
-      suhu.textContent = Math.round(h.temp) + "°C";
+      suhu.textContent = (h.temp == null || isNaN(h.temp)) ? "--" : Math.round(h.temp) + "°C";
       var prob = document.createElement("div");
       prob.className = "prob";
-      prob.textContent = h.prob + "%";
+      prob.textContent = (h.prob == null || isNaN(h.prob)) ? "–" : h.prob + "%";
       div.appendChild(jam); div.appendChild(suhu); div.appendChild(prob);
       strip.appendChild(div);
     });
@@ -112,9 +114,12 @@
       var kiri = document.createElement("span");
       kiri.textContent = fmtDay(t) + " · " + window.JemurCuaca.codeToId(data.daily.weather_code[i]);
       var kanan = document.createElement("strong");
+      // F-5: precipitation_probability_max null -> tampil "–", bukan "null%".
+      var pmax = data.daily.precipitation_probability_max
+        ? data.daily.precipitation_probability_max[i] : null;
       kanan.textContent = Math.round(data.daily.temperature_2m_min[i]) + "–"
         + Math.round(data.daily.temperature_2m_max[i]) + "°C · "
-        + data.daily.precipitation_probability_max[i] + "%";
+        + (pmax == null ? "–" : pmax + "%");
       li.appendChild(kiri); li.appendChild(kanan);
       dl.appendChild(li);
     });
@@ -122,7 +127,8 @@
     // Estimasi + notifikasi
     var hasil = window.JemurKering.hitungEstimasi(c, hours3, threshold);
     window.JemurKering.renderHasil(hasil);
-    window.JemurNotif.cekHujan(maxProb3, threshold);
+    var notif = window.JemurNotif.cekHujan(hasil.maxProb3, threshold);
+    // notif = {status, risk_pct, threshold, bahaya, event_id, versi} (POLA.md §5)
 
     var now = new Date();
     $("updateTime").textContent = "Diperbarui " + now.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });

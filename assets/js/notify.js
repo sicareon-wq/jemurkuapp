@@ -5,6 +5,8 @@
   var THRESHOLD_KEY = "jemurku_threshold_v1";
   var SOUND_KEY = "jemurku_sound_v1";
   var DEFAULT_THRESHOLD = 65;
+  // F-2: dedup per event — bunyi + notifikasi hanya sekali per kejadian bahaya.
+  var lastEventId = null;
 
   function getThreshold() {
     var v = parseInt(localStorage.getItem(THRESHOLD_KEY), 10);
@@ -53,26 +55,33 @@
   }
 
   // Dipanggil setiap data baru masuk. Banner selalu; notif browser + bunyi opsional.
+  // Key API stabil (POLA.md §5): status, risk_pct, threshold, bahaya, event_id, versi.
   function cekHujan(maxProb3, threshold) {
     var banner = document.getElementById("rainBanner");
     var text = document.getElementById("rainBannerText");
     var bahaya = maxProb3 >= threshold;
+    var eventId = bahaya ? ("hujan-" + threshold + "-" + maxProb3) : null;
 
     if (bahaya) {
-      text.textContent = "Peluang hujan " + maxProb3 + "% dalam 3 jam ke depan (ambang " + threshold + "%). Segera angkat jemuran!";
+      text.textContent = "Peluang hujan " + maxProb3 + "% dalam 3 jam (ambang " + threshold + "%). Segera angkat jemuran!";
       banner.hidden = false;
-      if (soundOn()) beep();
-      if ("Notification" in window && Notification.permission === "granted") {
-        try {
-          new Notification("JemurKu: hujan mendekat!", {
-            body: "Peluang hujan " + maxProb3 + "%. Segera angkat jemuran."
-          });
-        } catch (e) { /* abaikan */ }
+      if (eventId !== lastEventId) {
+        lastEventId = eventId;
+        if (soundOn()) beep();
+        if ("Notification" in window && Notification.permission === "granted") {
+          try {
+            new Notification("JemurKu: hujan mendekat!", {
+              body: "Peluang hujan " + maxProb3 + "%. Segera angkat jemuran."
+            });
+          } catch (e) { /* abaikan */ }
+        }
       }
     } else {
+      lastEventId = null; // reset saat aman — kejadian berikutnya bunyi lagi
       banner.hidden = true;
     }
-    return bahaya;
+    return { status: bahaya ? "tunda" : "aman", risk_pct: maxProb3,
+      threshold: threshold, bahaya: bahaya, event_id: eventId, versi: 1 };
   }
 
   window.JemurNotif = {

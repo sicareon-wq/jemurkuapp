@@ -26,20 +26,21 @@ body {
   background: var(--bg);
   color: var(--text);
   line-height: 1.5;
+  overflow-x: hidden;
 }
+
+img { max-width: 100%; }
 
 /* 1. Nav ramping, satu baris */
 .nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 12px;
-  max-height: 72px;
-  padding: 14px 20px;
+  padding: 14px max(20px, calc((100% - 1100px) / 2));
   background: var(--card);
   border-bottom: 2px solid var(--border);
-  max-width: 1100px;
-  margin: 0 auto;
 }
 .logo { font-weight: 800; font-size: 1.2rem; color: var(--accent-dark); text-decoration: none; }
 .nav-links { display: flex; gap: 12px; align-items: center; }
@@ -62,9 +63,15 @@ body {
 }
 .btn-primary { background: var(--accent); color: #fff; }
 .btn-primary:hover { background: var(--accent-dark); }
-.btn:focus-visible, a:focus-visible, summary:focus-visible {
+.btn:focus-visible, a:focus-visible, button:focus-visible, summary:focus-visible {
   outline: 3px solid var(--accent-dark);
   outline-offset: 2px;
+}
+
+@media (max-width: 560px) {
+  .nav-links a:first-child { display: none; }
+  .nav-links { flex: 1 1 100%; }
+  .nav-links .btn { flex: 1 1 100%; text-align: center; white-space: normal; line-height: 1.4; padding: 10px 18px; }
 }
 
 main { max-width: 1100px; margin: 0 auto; padding: 0 20px 32px; }
@@ -76,20 +83,23 @@ h2 { font-size: 1.4rem; margin: 0 0 8px; }
   gap: 20px;
   grid-template-columns: 1fr;
   align-items: center;
-  min-height: calc(100dvh - 72px);
-  padding: 24px 0;
+  padding: 20px 0;
 }
 @media (min-width: 760px) {
-  .hero { grid-template-columns: 1.1fr 1fr; }
+  .hero { grid-template-columns: 1.1fr 1fr; min-height: calc(100dvh - 72px); padding: 24px 0; }
 }
-.hero h1 { font-size: 2.4rem; line-height: 1.1; margin: 0 0 10px; max-width: 16ch; }
+.hero h1 { font-size: clamp(1.9rem, 5vw + 1rem, 2.6rem); line-height: 1.1; margin: 0 0 10px; max-width: 16ch; }
 .hero .sub { font-size: 1.1rem; color: var(--muted); margin: 0 0 18px; max-width: 42ch; }
 .hero-cta { display: flex; flex-wrap: wrap; gap: 10px; }
+.hero-cta .btn { white-space: normal; line-height: 1.4; padding: 10px 18px; }
+@media (min-width: 561px) {
+  .hero-cta .btn { line-height: 44px; padding: 0 18px; }
+}
 .photo-slot {
   background: var(--border);
   border: 2px dashed var(--muted);
   border-radius: var(--radius);
-  min-height: 280px;
+  min-height: 220px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -114,12 +124,15 @@ h2 { font-size: 1.4rem; margin: 0 0 8px; }
 
 /* 4. Langkah (strip, bukan kartu) */
 .steps { padding: 20px 0; }
-.steps ol { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 0; border-top: 2px solid var(--border); }
-.steps li { display: flex; gap: 14px; align-items: baseline; padding: 12px 0; border-bottom: 2px solid var(--border); }
-.steps li::before { content: counter(step); counter-increment: step; font-weight: 800; color: var(--accent); }
-.steps ol { counter-reset: step; }
-.steps strong { min-width: 150px; }
-.steps span { color: var(--muted); }
+.steps ol { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 0; border-top: 2px solid var(--border); counter-reset: step; }
+.steps li { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; padding: 12px 0; border-bottom: 2px solid var(--border); counter-increment: step; }
+.steps li::before { content: counter(step); font-weight: 800; color: var(--accent); }
+.steps strong { min-width: 0; flex: 0 0 130px; }
+.steps span { color: var(--muted); flex: 1 1 200px; }
+@media (max-width: 560px) {
+  .steps strong { flex: 1 1 100%; }
+  .steps span { flex: 1 1 100%; }
+}
 
 /* 5. Fitur 2+2 asimetris */
 .features { padding: 20px 0; }

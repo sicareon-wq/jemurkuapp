@@ -1,14 +1,15 @@
-/* Demo lite landing — DEMO-MIRROR dari shared/drying-rules.js (sementara).
-   Aturan ringkas untuk 1 lokasi contoh. Sumber tunggal saat BE lahir. */
+/* Demo lite landing — memakai threshold & aturan yang sama dengan web app.
+   Nomor WA admin sudah terisi di index.html (6285158551178). */
 (function () {
   "use strict";
 
-  // TODO: ganti nomor WA admin (62XXXXXXXXXX) di index.html sebelum launch.
   var LAT = -7.68, LON = 110.37; // Sleman (contoh)
   var THRESHOLD = 65;
 
-  var WMO = { 0: "Cerah", 1: "Cerah berawan", 2: "Berawan", 3: "Mendung" };
-  var RAIN = [51, 53, 55, 61, 63, 65, 80, 81, 82, 95, 96, 99];
+  var WMO = { 0: "Cerah", 1: "Cerah berawan", 2: "Berawan", 3: "Mendung",
+    45: "Berkabut", 48: "Berkabut",
+    51: "Gerimis", 53: "Gerimis", 55: "Gerimis", 56: "Gerimis", 57: "Gerimis" };
+  var RAIN = [51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82, 95, 96, 99];
   function codeId(c) { return WMO[c] || (RAIN.indexOf(c) !== -1 ? "Hujan" : "Berawan"); }
 
   function $(id) { return document.getElementById(id); }
@@ -39,8 +40,18 @@
       return r.json();
     }).then(function (d) {
       var c = d.current;
-      var probs = (d.hourly.precipitation_probability || []).slice(0, 3);
-      var maks = Math.max.apply(null, probs.concat([0]));
+      // Pakai jam ke depan (cocokkan current.time), bukan 3 entri pertama yang bisa basi.
+      var times = (d.hourly && d.hourly.time) || [];
+      var probs = d.hourly.precipitation_probability || [];
+      var start = 0;
+      if (c.time) {
+        for (var i = 0; i < times.length; i++) {
+          if (times[i] >= c.time) { start = i; break; }
+          start = i;
+        }
+      }
+      var next3 = probs.slice(start, start + 3);
+      var maks = next3.length ? Math.max.apply(null, next3.concat([0])) : 0;
       var hujan = (c.precipitation != null && c.precipitation > 0.5)
         || RAIN.indexOf(c.weather_code) !== -1;
       var detail = Math.round(c.temperature_2m) + "°C, " + codeId(c.weather_code) + " di lokasi contoh.";
