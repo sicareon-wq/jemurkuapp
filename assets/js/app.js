@@ -3,6 +3,7 @@
   "use strict";
 
   var REFRESH_MS = 20 * 60 * 1000;
+  var CACHE_KEY = "jemurku_cache_v1";
   var currentLoc = null;
   var lastData = null;
   var timer = null;
@@ -19,6 +20,26 @@
   function setLoading(loading) {
     $("btnRefresh").disabled = loading;
     $("btnRefresh").textContent = loading ? "Memuat…" : "Muat ulang";
+  }
+
+  // Fase 2 Task 2: mode mandiri — simpan respons terakhir ke localStorage.
+  function saveCache(data) {
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify({ savedAt: Date.now(), data: data }));
+    } catch (e) { /* abaikan */ }
+  }
+
+  function loadCache() {
+    try {
+      var raw = localStorage.getItem(CACHE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) { return null; }
+  }
+
+  function setStale(basi, jamSimpan) {
+    var badge = $("staleBadge");
+    badge.hidden = !basi;
+    if (basi) badge.textContent = "Data terakhir" + (jamSimpan ? " " + jamSimpan : "");
   }
 
   function fmtHour(iso) {
@@ -50,16 +71,30 @@
     window.JemurCuaca.fetchForecast(currentLoc.lat, currentLoc.lon)
       .then(function (data) {
         lastData = data;
+        saveCache(data);
+        setStale(false);
         renderSemua(data);
         jadwalRefresh();
       })
       .catch(function (err) {
-        showMessage("Gagal memuat cuaca: " + err.message + " Periksa koneksi lalu tekan Muat ulang.");
+        // Mode mandiri: gagal fetch -> tampilkan cache berlabel "terakhir".
+        var cache = loadCache();
+        if (cache && cache.data) {
+          lastData = cache.data;
+          var jam = new Date(cache.savedAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+          setStale(true, "pukul " + jam);
+          renderSemua(cache.data, true);
+          jadwalRefresh();
+          showMessage("Koneksi gagal (" + err.message + "). Menampilkan data terakhir pukul " + jam + ". Tekan Muat ulang untuk coba lagi.");
+        } else {
+          setStale(false);
+          showMessage("Gagal memuat cuaca: " + err.message + " Periksa koneksi lalu tekan Muat ulang.");
+        }
       })
       .finally(function () { setLoading(false); });
   }
 
-  function renderSemua(data) {
+  function renderSemua(data, dariCache) {
     var c = data.current;
     var threshold = window.JemurNotif.getThreshold();
 
@@ -126,12 +161,21 @@
 
     // Estimasi + notifikasi
     var hasil = window.JemurKering.hitungEstimasi(c, hours3, threshold);
-    window.JemurKering.renderHasil(hasil);
+    // Jam aman berikutnya: jam pertama setelah ini yang prob < threshold.
+    var jamAman = null;
+    for (var j = 3; j < hours12.length; j++) {
+      if (hours12[j].prob != null && hours12[j].prob < threshold) { jamAman = fmtHour(hours12[j].time); break; }
+    }
+    window.JemurKering.renderHasil(hasil, jamAman);
     var notif = window.JemurNotif.cekHujan(hasil.maxProb3, threshold);
     // notif = {status, risk_pct, threshold, bahaya, event_id, versi} (POLA.md §5)
 
-    var now = new Date();
-    $("updateTime").textContent = "Diperbarui " + now.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+    if (dariCache) {
+      $("updateTime").textContent = "Data terakhir — tekan Muat ulang";
+    } else {
+      var now = new Date();
+      $("updateTime").textContent = "Diperbarui " + now.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+    }
   }
 
   function jadwalRefresh() {
